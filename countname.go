@@ -10,7 +10,9 @@ import (
 
 const doc = "countname is ..."
 
-// Analyzer is ...
+const maxLongNum = 19
+
+// Analyzer search long name decl
 var Analyzer = &analysis.Analyzer{
 	Name: "countname",
 	Doc:  doc,
@@ -31,24 +33,21 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	inspect.Preorder(nodeFilter, func(n ast.Node) {
 		switch decl := n.(type) {
 		case *ast.GenDecl:
-			// log.Printf("%+v\n", decl)
 			for i := 0; i < len(decl.Specs); i++ {
-				// fmt.Printf("specs:%+v\n", decl.Specs[i])
 				switch spec := decl.Specs[i].(type) {
 				case *ast.ValueSpec:
-					// fmt.Printf("value:%+v\n", spec)
+					var flag bool
 					for _, name := range spec.Names {
-						// fmt.Printf("name:%v\n", name)
-						if len(name.Name) >= 20 {
-							pass.Reportf(n.Pos(), "name is too long")
+						if !flag && len(name.Name) > maxLongNum {
+							pass.Reportf(n.Pos(), "name is longer than %d", maxLongNum)
+							flag = true
 						}
 					}
 				}
 			}
 		case *ast.FuncDecl:
-			// log.Printf("%+v len:%d\n", n, len(decl.Name.Name))
-			if len(decl.Name.Name) >= 20 {
-				pass.Reportf(n.Pos(), "name is too long")
+			if len(decl.Name.Name) > maxLongNum {
+				pass.Reportf(n.Pos(), "name is longer than %d", maxLongNum)
 			}
 		}
 	})
