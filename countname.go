@@ -24,18 +24,34 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 
 	nodeFilter := []ast.Node{
-		(*ast.Ident)(nil),
+		(*ast.GenDecl)(nil),
+		(*ast.FuncDecl)(nil),
 	}
 
 	inspect.Preorder(nodeFilter, func(n ast.Node) {
-		switch n := n.(type) {
-		case *ast.Ident:
-			if n.Name == "gopher" {
-				pass.Reportf(n.Pos(), "identifier is gopher")
+		switch decl := n.(type) {
+		case *ast.GenDecl:
+			// log.Printf("%+v\n", decl)
+			for i := 0; i < len(decl.Specs); i++ {
+				// fmt.Printf("specs:%+v\n", decl.Specs[i])
+				switch spec := decl.Specs[i].(type) {
+				case *ast.ValueSpec:
+					// fmt.Printf("value:%+v\n", spec)
+					for _, name := range spec.Names {
+						// fmt.Printf("name:%v\n", name)
+						if len(name.Name) >= 20 {
+							pass.Reportf(n.Pos(), "name is too long")
+						}
+					}
+				}
+			}
+		case *ast.FuncDecl:
+			// log.Printf("%+v len:%d\n", n, len(decl.Name.Name))
+			if len(decl.Name.Name) >= 20 {
+				pass.Reportf(n.Pos(), "name is too long")
 			}
 		}
 	})
 
 	return nil, nil
 }
-

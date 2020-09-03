@@ -1,8 +1,10 @@
 package a
 
-func f() {
-	// The pattern can be written in regular expression.
-	var gopher int // want "pattern"
-	print(gopher)  // want "identifier is gopher"
-}
+import "fmt"
 
+var hogehogehogehogehoge string // want "name is too long"
+
+func hogehogehogehogehoga() { // want "name is too long"
+
+	fmt.Println(hogehogehogehogehoge)
+}
